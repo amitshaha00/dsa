@@ -1,0 +1,111 @@
+#include<iostream>
+#include<fstream>
+#include<string.h>
+using namespace std;
+
+class student {
+    int roll, div;
+    char name[10], address[10];
+public:
+    void getdata() {
+        cout << "\nEnter Roll number, Name, Division, and Address:\n";
+        cin >> roll >> name >> div >> address;
+    }
+    void putdata() {
+        cout << "\n" << roll << "\t" << name << "\t" << div << "\t" << address;
+    }
+    int return_Roll() { return roll; }
+};
+
+class seq {
+    char fname[15];
+public:
+    void create();
+    void display();
+    void Add();
+    void Remove(int);
+    void search(int);
+};
+
+void seq::create() {
+    ofstream fp(fname);
+    student s;
+    char op;
+    do {
+        s.getdata();
+        fp.write((char*)&s, sizeof(s));
+        cout << "\nDo you want to add a new record? (y/n): ";
+        cin >> op;
+    } while (op == 'y');
+    fp.close();
+}
+
+void seq::display() {
+    ifstream fp(fname);
+    student s;
+    cout << "\nRoll\tName\tDiv\tAddress";
+    while (fp.read((char*)&s, sizeof(s))) {
+        s.putdata();
+    }
+    fp.close();
+}
+
+void seq::Add() {
+    ofstream fp(fname, ios::app);
+    student s;
+    s.getdata();
+    fp.write((char*)&s, sizeof(s));
+    fp.close();
+}
+
+void seq::Remove(int key) {
+    ifstream f1(fname);
+    ofstream f2("Temp.Txt");
+    student s;
+    int flag = 0;
+    while (f1.read((char*)&s, sizeof(s))) {
+        if (key == s.return_Roll()) {
+            s.putdata();
+            flag = 1;
+        } else {
+            f2.write((char*)&s, sizeof(s));
+        }
+    }
+    if (flag == 0) cout << "\nRecord does not exist";
+    f1.close();
+    f2.close();
+    remove(fname);
+    rename("Temp.Txt", fname);
+}
+
+void seq::search(int key) {
+    ifstream fp(fname);
+    student s;
+    int flag = 0;
+    while (fp.read((char*)&s, sizeof(s))) {
+        if (key == s.return_Roll()) {
+            flag = 1;
+            break;
+        }
+    }
+    if (flag == 0) cout << "Record does not exist";
+    else s.putdata();
+    fp.close();
+}
+
+int main() {
+    int ch, R;
+    seq ob;
+    do {
+        cout << "\n1: Create Database\n2: Display\n3: Add a record\n4: Delete a record\n5: Search a record";
+        cout << "\nEnter your choice: ";
+        cin >> ch;
+        switch(ch) {
+            case 1: ob.create(); break;
+            case 2: ob.display(); break;
+            case 3: ob.Add(); ob.display(); break;
+            case 4: cout << "\nEnter Roll No to delete"; cin >> R; ob.Remove(R); ob.display(); break;
+            case 5: cout << "\nEnter Roll No to search"; cin >> R; ob.search(R); break;
+        }
+    } while (ch < 6);
+}
